@@ -40,7 +40,7 @@ class OptionForm(Form):
                                   [validators.NumberRange(min=1000, max=1000000)])
 
 
-def invent(attempts, num_cards):
+def invent(attempts=10000, num_cards=1):
     """
     :param attempts: Number of attempts markovify should take to generate a valid sentence for each card.
     :param num_cards: Number of cards to generate.
@@ -89,6 +89,14 @@ def index():
 
     return render_template('index.html')
 
+
+@app.route('/api', methods=['GET'])
+def api():
+    card = invent()
+    try:
+        return card[0].encode('utf-8')
+    except UnicodeEncodeError:
+        return None
 
 app.jinja_env.globals.update(invent=invent)
 
