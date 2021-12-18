@@ -1,5 +1,5 @@
-FROM python:2.7
-MAINTAINER Ryan Draga <ryan.draga@tuxotaku.com>
+FROM python:3.9-alpine
+LABEL author="Ryan Draga <ryan.draga@boxingoctop.us>"
 LABEL version="1.0"
 ENV PYTHONDONTWRITEBYTECODE 1
 ADD . /app
