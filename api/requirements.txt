@@ -2,7 +2,6 @@ markovify
 Unidecode
 requests
 flask
-flask-wtf
 python-dotenv
 gunicorn
-flask-analytics
+flask-cors

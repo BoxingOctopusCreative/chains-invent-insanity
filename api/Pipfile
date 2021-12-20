@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+markovify = "*"
+requests = "*"
+python-dotenv = "*"
+gunicorn = "*"
+Unidecode = "*"
+Flask = "*"
+
+[dev-packages]
+
+[scripts]
+start = "gunicorn app:app --bind=0.0.0.0 --reload"
+
+[requires]
+python_version = "3.9"
