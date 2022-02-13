@@ -16,4 +16,4 @@ RUN pip install -r requirements.txt --no-cache-dir --disable-pip-version-check
 
 USER ci2
 
-ENTRYPOINT [ "gunicorn", "app:app", "--bind=0.0.0.0", "--reload", "-w", "4" ]
+ENTRYPOINT [ "gunicorn", "app:app", "-c", "gunicorn.conf.py" ]

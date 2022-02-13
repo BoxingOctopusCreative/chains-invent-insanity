@@ -1,6 +1,6 @@
 import React from 'react';
 
-const card_bg = 'https://ci2-assets.nyc3.digitaloceanspaces.com/CAH-blank-white.png';
+const card_bg = 'https://chains-invent-insanity-assets.sfo3.digitaloceanspaces.com/images/CAH-blank-white.png';
 
 export const Cards = (props) => (
     <div className="cah_cards">

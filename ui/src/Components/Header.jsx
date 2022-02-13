@@ -3,7 +3,9 @@ import React from 'react';
 export const Header = () => (
     <header className="page-header">
         <div className="jumbotron jumbotron-fluid">
-            <div className="h1">Welcome to Chains Invent Insanity</div><br />
+            <div className="h1">
+                Welcome to <img src="https://chains-invent-insanity-assets.sfo3.digitaloceanspaces.com/images/Logo%20White.png" alt="Chains Invent Insanity" />
+            </div>
             <p className="text-left">
                 Chains Invent Insanity is a <a href="https://cardsagainsthumanity.com" target="_blank" rel="noreferrer">
                 Cards Against Humanity</a> answer card generator.<br />

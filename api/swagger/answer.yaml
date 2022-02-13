@@ -1,0 +1,42 @@
+This endpoint returns the answer to the question card.
+---
+parameters:
+  - name: num_cards
+    in: query
+    type: integer
+    required: true
+    default: 1
+    description: Number of cards to return
+  - name: attempts
+    in: query
+    type: integer
+    required: true
+    default: 1000
+    description: Number of attempts made by the Markov chain to generate a card
+definitions:
+  answer:
+    type: object
+    properties:
+      num_cards:
+        type: integer
+        default: 1
+      attempts:
+        type: integer
+        default: 1000
+responses:
+  200:
+    description: OK
+    schema:
+      $ref: '#/definitions/answer'
+      properties:
+        num_cards:
+            type: integer
+            description: Number of cards returned
+            default: 1
+        attempts:
+            type: integer
+            description: Number of attempts made by the Markov chain to generate a card
+            default: 1000
+    example:
+      num_cards: 1
+      attempts: 1000

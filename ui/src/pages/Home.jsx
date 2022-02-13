@@ -1,5 +1,4 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Container, Row, Col, Stack } from 'react-bootstrap';
 import { Header } from './Components/Header';
 import { Explainer } from './Components/Explainer';
