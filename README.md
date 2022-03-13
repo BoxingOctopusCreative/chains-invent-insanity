@@ -1,24 +1,52 @@
 # Chains Invent Insanity
-A Markov Chain-based [Cards Against Humanity](https://cardsagainsthumanity.com) answer card generator.
 
-## Usage:
+![Chains Invent Insanity](https://chains-invent-insanity-assets.sfo3.digitaloceanspaces.com/images/Logo%20Black.png)
 
-### Basic Standalone Setup:
-*All app files can be found within the ```./app``` directory.*
+*A Markov Chain-based [Cards Against Humanity](https://cardsagainsthumanity.com) answer card generator.*
 
-1. Create a virtualenv: ```virtualenv chains-invent-insanity```
-2. Activate the new virtualenv: ```source $path_to_venv/bin/activate``` or with virtualenvwrapper: ```workon chains-invent-insanity```
-3. Install Requirements: ```pip install -r requirements.txt```
-4. Create .env file in ```./app``` directory based on the ```env.example``` file in the same directory. 
-5. Run the app via the bundled gunicorn WSGI server: ```gunicorn -D -b 0.0.0.0:8000 -w 1 web:app```
+- - -
 
-### Setup via Docker Compose:
-1. Create ```.env``` file in ```./app``` directory based on the ```env.example``` file in the same directory.
-2. Build microservices: ```docker-compose build```
-3. Bring up cluster: ```docker-compose up -d```
+## Requirements
 
-***NOTES:*** 
-- URIs in the ```.env``` file **MUST NOT** contain quotes, as these will be parsed literally as part of the URI.
-- If you decide to store the wordlists for the cards remotely on Amazon S3, ensure that the ```Content-Type``` metadata 
- (found under the *Properties* for the file in the AWS Web Console) for the file is set to ```text/plain; charset=utf-8```, otherwise special characters in the cards may not
-render correctly.
+### API
+
+* Pipenv: [pipenv](https://pipenv.pypa.io/)
+* Python 3.9+
+
+### Frontend
+
+* Node.js: [Node.js](https://nodejs.org/)
+* React: [React](https://reactjs.org/)
+
+## Setup
+
+### API
+
+1. Install Pipenv Environment and all dependencies
+
+`pipenv install`
+
+2. Start the API server
+
+`pipenv run start`
+
+### Frontend
+
+1. Install Dependencies
+
+`npm install`
+
+2. Start the frontend server
+
+`npm run start`
+
+## Usage
+
+### API
+
+The API is accessible at `http://localhost:8000/api/v1/`, however there are also Swagger docs available at `http://localhost:8000/apidocs/`.
+
+To modify any API configuration, edit the `gunicorn.conf.py` file.
+
+### Frontend
+Once the Frontend service is up and running, it can be accessed at `http://localhost:3000/`.

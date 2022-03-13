@@ -9,7 +9,7 @@ const GithubUrl        = '<a href="https://github.com/BoxingOctopus/chains-inven
 export const Footer = () => (
     <div className="fixed-bottom">
         <footer className="page-footer font-small pt4">
-            <div className="footer-copyright text-center py-3">
+            <div className="text-center py-3">
                 Another fine {Parser(BoxingOctopusUrl)} Project | Built with {Parser(FlaskUrl)} and {Parser(ReactUrl)} | Clone this project on {Parser(GithubUrl)}
             </div>
         </footer>
