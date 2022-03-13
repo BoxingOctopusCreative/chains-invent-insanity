@@ -2,7 +2,7 @@
 
 ![Chains Invent Insanity](https://chains-invent-insanity-assets.sfo3.digitaloceanspaces.com/images/Logo%20Black.png)
 
-*A Markov Chain-based [Cards Against Humanity](https://cardsagainsthumanity.com) answer card generator.*
+*A Markov Chain-based [Cards Against Humanity](https://cardsagainsthumanity.com) card generator.*
 
 - - -
 
