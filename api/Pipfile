@@ -10,11 +10,12 @@ python-dotenv = "*"
 gunicorn = "*"
 Unidecode = "*"
 Flask = "*"
+flasgger = "*"
 
 [dev-packages]
 
 [scripts]
-start = "gunicorn app:app --bind=0.0.0.0 --reload --daemon"
+start = "gunicorn app:app --bind=0.0.0.0 --reload"
 
 [requires]
 python_version = "3.9"
