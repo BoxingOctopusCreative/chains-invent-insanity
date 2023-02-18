@@ -14,7 +14,7 @@ Flask = "*"
 [dev-packages]
 
 [scripts]
-start = "gunicorn app:app --bind=0.0.0.0 --reload"
+start = "gunicorn app:app --bind=0.0.0.0 --reload --daemon"
 
 [requires]
 python_version = "3.9"
