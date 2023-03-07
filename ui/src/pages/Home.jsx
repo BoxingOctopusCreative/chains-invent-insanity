@@ -4,8 +4,6 @@ import { Header } from '../Components/Header';
 import { Explainer } from '../Components/Explainer';
 import Controls from '../Components/Controls';
 import { Cards } from '../Components/Cards';
-import axios from 'axios';
-import ApiClient from '../Components/ApiClient';
 
 export default class Home extends Component {
   render() {
@@ -26,7 +24,7 @@ export default class Home extends Component {
           <Col>
             <Cards>
               jibby jabby
-              {/* {post.answer} */}
+              {formData}
             </Cards>
           </Col>
         </Row>
@@ -46,7 +44,7 @@ export default class Home extends Component {
 //   //       setPost(response.data);
 //   //     });
 //   //   }, []);
-  
+
 //   //   if (!post) return null;
 
 // };

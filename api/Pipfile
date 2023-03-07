@@ -16,6 +16,7 @@ flasgger = "*"
 
 [scripts]
 start = "gunicorn app:app --bind=0.0.0.0 --reload"
+start-daemon = "gunicorn app:app --bind=0.0.0.0 --daemon"
 
 [requires]
 python_version = "3.9"

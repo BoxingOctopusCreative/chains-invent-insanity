@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { Header } from '../Components/Header';
-import { Controls } from '../Components/Controls';
+import Controls from '../Components/Controls';
 import { Cards } from '../Components/Cards';
-import axios from 'axios';
-import ApiClient from '../Components/ApiClient';
 
 export default class Home extends Component {
     render() {
@@ -18,7 +16,7 @@ export default class Home extends Component {
             <Col>
               <Cards>
                 jibby jabby
-                {/* {post.answer} */}
+                {post.answer}
               </Cards>
             </Col>
           </Row>
