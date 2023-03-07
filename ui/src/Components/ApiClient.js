@@ -12,6 +12,6 @@ export default function ApiClient(card_type, num_cards, attempts) {
           setPost(response.data);
         });
       }, []);
-    
+
       if (!post) return null;
 }

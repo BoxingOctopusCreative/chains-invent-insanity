@@ -36,15 +36,15 @@ export const Styles = styled.div`
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-weight: bold;
   }
-  
+
   hr {
     border-color: #ffffff;
   }
-  
+
   .text-muted {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
-  
+
   .form-label {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
@@ -52,7 +52,7 @@ export const Styles = styled.div`
   .form-control {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
-  
+
   button {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-weight: bold;
@@ -135,7 +135,7 @@ export const Styles = styled.div`
     line-height: 1.6em;
     margin-top: 0;
   }
-  
+
   .cah_card_inverted {
     position: relative;
     float: left;
@@ -159,7 +159,7 @@ export const Styles = styled.div`
     line-height: 1.6em;
     margin-top: 0;
   }
-  
+
   .cah_card .cahlogo {
     position: absolute;
     bottom: 0.05em;

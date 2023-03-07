@@ -6,7 +6,7 @@ export const Explainer = () => (
     <p className="text-left">
       Because Cards Against Humanity is fun, and hilarious; but let's face it, play it enough times and
       you start to get bored, because you've seen every answer. Also, Markov chains are absurd, and hilarious.
-      So to my way of thinking, they're a perfect combination. 
+      So to my way of thinking, they're a perfect combination.
     </p>
     <p className="text-left">
       That said, I have a strange sense of humour;

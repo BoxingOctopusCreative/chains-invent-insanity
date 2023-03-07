@@ -13,10 +13,10 @@ export default class Navigation extends Component {
   render() {
     return (
       <>
-        <Modal 
+        <Modal
           aria-labelledby="contained-modal-title-vcenter"
-          centered 
-          show={this.state.isOpen} 
+          centered
+          show={this.state.isOpen}
           onHide={this.closeModal}
         >
           <Modal.Header closeButton>
@@ -47,10 +47,10 @@ export default class Navigation extends Component {
               <Navbar fixed="top">
                 <Container>
                   <Navbar.Brand href="/">
-                    <img 
-                      src="https://chains-invent-insanity-assets.sfo3.digitaloceanspaces.com/images/Icon%20Black.png" 
-                      className='navbar-brand-logo' 
-                      alt="Chains Invent Insanity" 
+                    <img
+                      src="https://chains-invent-insanity-assets.sfo3.digitaloceanspaces.com/images/Icon%20Black.png"
+                      className='navbar-brand-logo'
+                      alt="Chains Invent Insanity"
                     />
                   </Navbar.Brand>
                   <Navbar.Collapse id="basic-navbar-nav">

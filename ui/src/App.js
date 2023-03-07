@@ -16,7 +16,7 @@ export default function App() {
           <Route path="about" element={<About />} />
           <Route path="invent" element={<Invent />} />
           <Route path="*" element={<FourOhFour />} />
-        </Route> 
+        </Route>
       </Routes>
     </BrowserRouter>
   );
