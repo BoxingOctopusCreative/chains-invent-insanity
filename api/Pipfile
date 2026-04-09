@@ -10,13 +10,15 @@ python-dotenv = "*"
 gunicorn = "*"
 Unidecode = "*"
 Flask = "*"
-flasgger = "*"
+boto3 = "*"
 
 [dev-packages]
+pytest = "*"
 
 [scripts]
-start = "gunicorn app:app --bind=0.0.0.0 --reload"
-start-daemon = "gunicorn app:app --bind=0.0.0.0 --daemon"
+test = "pytest"
+start = "gunicorn app:app --bind=0.0.0.0 --reload -c gunicorn.conf.py"
+start-daemon = "gunicorn app:app --bind=0.0.0.0 --daemon -c gunicorn.conf.py"
 
 [requires]
-python_version = "3.9"
+python_version = "3.14"

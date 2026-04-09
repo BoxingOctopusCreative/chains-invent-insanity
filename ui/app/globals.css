@@ -1,0 +1,100 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --cah-answer-bg: url("https://ci2-assets.chainsinventinsanity.lol/images/Answer%20Card.svg");
+  --cah-question-bg: url("https://ci2-assets.chainsinventinsanity.lol/images/Question%20Card.svg");
+}
+
+body {
+  @apply m-0 bg-black font-sans text-white antialiased;
+}
+
+@layer components {
+  .jumbotron {
+    @apply rounded-[10px] bg-gray-300 px-4 py-4 text-black sm:px-6 sm:py-5 sm:pl-[50px];
+  }
+
+  .jumbotron a {
+    @apply text-[#555] no-underline;
+  }
+
+  .vertical-center {
+    @apply mt-[100px] flex items-center justify-center;
+  }
+
+  /* Wrapper centers fixed-size cards; parent column may use overflow-x-auto if narrower than 225px. */
+  .cah_cards {
+    @apply flex w-full min-w-0 justify-center;
+  }
+
+  /* Art on ::before so it respects border-radius; overflow-x-auto ancestors clip corners if they scroll. */
+  .cah_card {
+    @apply relative isolate h-[315px] w-[225px] shrink-0 overflow-hidden rounded-2xl border-[0.1em] border-black bg-white p-4;
+  }
+
+  .cah_card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    background-image: var(--cah-answer-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .cah_card p {
+    @apply relative z-[1] mt-0 text-sm font-bold leading-relaxed text-black sm:text-base;
+  }
+
+  .cah_card_inverted {
+    @apply relative isolate h-[315px] w-[225px] shrink-0 overflow-hidden rounded-2xl border-[0.1em] border-white bg-black p-4;
+  }
+
+  .cah_card_inverted::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    background-image: var(--cah-question-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .cah_card_inverted p {
+    @apply relative z-[1] mt-0 text-sm font-bold leading-relaxed text-white sm:text-base;
+  }
+
+  .cah_card .cahlogo,
+  .cah_card_inverted .cahlogo {
+    @apply absolute bottom-[0.05em] left-0 z-[1] object-contain object-left-bottom;
+  }
+
+  .navbar-brand-logo {
+    @apply h-auto w-[50px];
+  }
+
+  .section-title {
+    @apply pt-4 font-bold sm:pt-[25px];
+  }
+
+  .page-footer {
+    @apply bg-black font-bold text-gray-400;
+  }
+
+  .page-footer a {
+    @apply text-white no-underline;
+  }
+
+  .img-fluid {
+    @apply h-10 p-1 sm:h-14 sm:p-2 md:h-[70px] md:p-[10px];
+  }
+}

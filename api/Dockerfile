@@ -1,7 +1,7 @@
-FROM python:3.9-alpine
+FROM python:3.14-alpine
 
 LABEL author="Ryan Draga <ryan.draga@boxingoctop.us>"
-LABEL version="2.0"
+LABEL version="3.0"
 
 ENV PYTHONDONTWRITEBYTECODE 1
 

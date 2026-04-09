@@ -1,11 +1,53 @@
-version: '3'
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
+
+---
+
+volumes:
+  print-cache-data:
 
 services:
   api:
     build: ./api
-    env_file: ./api/.env
+    environment:
+      - DEBUG_MODE=True
+      - APP_KEY=a1b2c3d4
+      - PORT=8000
+      - USE_LOCAL_WORDLIST=True
+      - LOCAL_QUESTION_WORDLIST=/app/assets/questions.txt
+      - LOCAL_ANSWER_WORDLIST=/app/assets/answers.txt
+      - REMOTE_QUESTION_WORDLIST=https://ci2-assets.chainsinventinsanity.lol/questions.txt
+      - REMOTE_ANSWER_WORDLIST=https://ci2-assets.chainsinventinsanity.lol/answers.txt
+      - PRINT_CACHE_DIR=/app/print_cache
+    volumes:
+      - print-cache-data:/app/print_cache
     ports:
       - "8000:8000"
+
+  # Removes PDFs older than PRINT_CACHE_MAX_AGE_* from the shared volume and (when configured) from S3.
+  # Mirror the same PRINT_CACHE_S3_* / AWS_* vars as `api` if you use S3 mirroring.
+  print-cache-cleanup:
+    build: ./api
+    command: ["python", "print_cache_cleanup.py"]
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PRINT_CACHE_DIR: /app/print_cache
+      PRINT_CACHE_MAX_AGE_HOURS: "24"
+      PRINT_CACHE_CLEANUP_INTERVAL_SECONDS: "3600"
+    volumes:
+      - print-cache-data:/app/print_cache
+    depends_on:
+      - api
+
+  # Browser loads the spec from the host (localhost:8000), not from the Docker network.
+  swagger-ui:
+    image: swaggerapi/swagger-ui:v5.17.14
+    depends_on:
+      - api
+    ports:
+      - "8080:8080"
+    environment:
+      # Fetched by the browser; use your public API URL in production.
+      URL: http://localhost:8000/openapi.yaml
 
   ui:
     build: ./ui

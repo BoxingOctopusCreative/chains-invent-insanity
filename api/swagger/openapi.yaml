@@ -1,0 +1,132 @@
+# Swagger 2.0 — edit `host` when deploying (or point Swagger UI URL at this file).
+# Served by the API at GET /openapi.yaml for tools and "Try it out".
+swagger: "2.0"
+info:
+  title: Chains Invent Insanity
+  description: API for Chains Invent Insanity
+  version: "2.0"
+  termsOfService: https://chainsinventinsanity.com/terms
+  contact:
+    name: Boxing Octopus Creative
+    email: ryan.draga@boxingoctop.us
+    url: https://boxingoctop.us
+
+host: localhost:8000
+basePath: /
+schemes:
+  - http
+  - https
+
+paths:
+  /api/v1/question:
+    get:
+      summary: Generate question card text
+      description: Returns Markov-generated question lines (JSON key is `answer` for historical reasons).
+      parameters:
+        - name: num_cards
+          in: query
+          type: integer
+          default: 1
+          required: false
+          description: Number of cards to return
+        - name: attempts
+          in: query
+          type: integer
+          default: 1000
+          required: false
+          description: Markov attempts per card
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/InventorResponse"
+        "400":
+          description: Invalid num_cards or attempts
+
+  /api/v1/answer:
+    get:
+      summary: Generate answer card text
+      description: Returns Markov-generated answer lines (JSON key is `answer`).
+      parameters:
+        - name: num_cards
+          in: query
+          type: integer
+          default: 1
+          required: false
+        - name: attempts
+          in: query
+          type: integer
+          default: 1000
+          required: false
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: "#/definitions/InventorResponse"
+        "400":
+          description: Invalid num_cards or attempts
+
+  /api/v1/print-cache:
+    post:
+      summary: Upload a PDF to server print cache (optional S3 mirror)
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: file
+          in: formData
+          type: file
+          required: true
+          description: PDF bytes (e.g. chains-invent-cards.pdf)
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: Stored; JSON includes downloadPath and optional downloadUrl (S3)
+          schema:
+            $ref: "#/definitions/PrintCacheUploadResponse"
+        "400":
+          description: Missing or empty file
+
+  /api/v1/print-cache/files/{file_id}:
+    get:
+      summary: Download a cached PDF by id
+      parameters:
+        - name: file_id
+          in: path
+          type: string
+          required: true
+          description: UUID with optional .pdf suffix
+      produces:
+        - application/pdf
+      responses:
+        "200":
+          description: PDF attachment
+        "404":
+          description: Invalid id or file gone
+
+definitions:
+  InventorResponse:
+    type: object
+    properties:
+      answer:
+        type: array
+        items:
+          type: string
+        description: Generated card lines (one or many strings)
+
+  PrintCacheUploadResponse:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      downloadPath:
+        type: string
+        example: /api/v1/print-cache/files/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.pdf
+      downloadUrl:
+        type: string
+        description: Present when S3 upload is enabled

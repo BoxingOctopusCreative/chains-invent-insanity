@@ -1,61 +1,43 @@
-from flask import Flask, request, jsonify, Response
-from flasgger import Swagger, swag_from
+from flask import Flask, request, jsonify, Response, send_file
 import inventor
+import logging
+import os
+import uuid as uuid_lib
+
+import print_cache_s3
+from print_cache_paths import get_print_cache_dir
+
+logger = logging.getLogger(__name__)
+
+PRINT_CACHE_DIR = get_print_cache_dir()
+os.makedirs(PRINT_CACHE_DIR, exist_ok=True)
+
+_OPENAPI_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'swagger', 'openapi.yaml')
 
 cfg             = inventor.Config()
 app             = Flask(__name__)
 app.debug       = cfg.debug_mode
 app.secret_key  = cfg.app_key
+app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 32 MiB PDF uploads
 
-template = {
-  "swagger": "2.0",
-  "swagger_ui_css": "https://raw.githubusercontent.com/Amoenus/SwaggerDark/master/SwaggerDark.css",
-  "info": {
-    "title": "Chains Invent Insanity",
-    "description": "API for Chains Invent Insanity",
-    "contact": {
-      "responsibleOrganization": "Boxing Octopus Creative",
-      "responsibleDeveloper": "ryan.draga@boxingoctop.us",
-      "email": "ryan.draga@boxingoctop.us",
-      "url": "https://boxingoctop.us",
-    },
-    "termsOfService": "https://chainsinventinsanity.com/terms",
-    "version": "2.0"
-  },
-  #"host": "https://chainsinventinsanity.com",  # overrides localhost:500
-  "basePath": "/api",  # base bash for blueprint registration
-  "schemes": [
-    "http",
-    "https"
-  ],
-  "operationId": "getmyData"
-}
 
-swagger_config = {
-    "headers": [],
-    "specs": [
-        {
-            "endpoint": 'apispec_1',
-            "route": '/apispec_1.json',
-            "rule_filter": lambda rule: True,  # all in
-            "model_filter": lambda tag: True,  # all in
-        }
-    ],
-    #"static_url_path": "/flasgger_static",
-    # "static_folder": "static",  # must be set by user
-    "swagger_ui": True,
-    "specs_route": "/apidocs/",
-    "favicon": "https://chains-invent-insanity-assets.sfo3.digitaloceanspaces.com/images/swagger_fav.png",
-    "swagger_ui_bundle_js": 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.5.0/swagger-ui-bundle.js',
-    "swagger_ui_standalone_preset_js": 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.5.0/swagger-ui-standalone-preset.js',
-    'jquery_js': 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js',
-    'swagger_ui_css': 'https://chains-invent-insanity-assets.sfo3.digitaloceanspaces.com/css/theme-newspaper.css'
-}
+@app.route('/openapi.yaml', methods=['GET', 'OPTIONS'])
+def openapi_yaml():
+    if request.method == 'OPTIONS':
+        r = Response()
+        r.headers['Access-Control-Allow-Origin'] = '*'
+        r.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        r.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        r.headers['Access-Control-Max-Age'] = '3600'
+        return r
+    if not os.path.isfile(_OPENAPI_PATH):
+        return Response('OpenAPI spec not found', status=404)
+    resp = send_file(_OPENAPI_PATH, mimetype='application/yaml')
+    resp.headers.add('Access-Control-Allow-Origin', '*')
+    return resp
 
-swagger = Swagger(app, template=template, config=swagger_config)
 
 @app.route('/api/v1/question', methods=['GET'])
-@swag_from('swagger/question.yaml')
 def question():
 
     num_cards = request.args.get('num_cards', default=1, type=int)
@@ -82,7 +64,6 @@ def question():
         return response
 
 @app.route('/api/v1/answer', methods=['GET'])
-@swag_from('swagger/answer.yaml')
 def answer():
 
     num_cards = request.args.get('num_cards', default=1, type=int)
@@ -108,8 +89,83 @@ def answer():
     else:
         return response
 
+
+def _cors(resp):
+    resp.headers.add('Access-Control-Allow-Origin', '*')
+    return resp
+
+
+@app.route('/api/v1/print-cache', methods=['POST', 'OPTIONS'])
+def print_cache_upload():
+    if request.method == 'OPTIONS':
+        r = Response()
+        r.headers['Access-Control-Allow-Origin'] = '*'
+        r.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        r.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        r.headers['Access-Control-Max-Age'] = '3600'
+        return r
+
+    if 'file' not in request.files:
+        return _cors(jsonify({'error': 'missing file'})), 400
+    f = request.files['file']
+    if f.filename is None or f.filename == '':
+        return _cors(jsonify({'error': 'empty upload'})), 400
+
+    uid = uuid_lib.uuid4()
+    dest = os.path.join(PRINT_CACHE_DIR, f'{uid}.pdf')
+    f.save(dest)
+
+    download_path = f'/api/v1/print-cache/files/{uid}.pdf'
+    body = {'id': str(uid), 'downloadPath': download_path}
+
+    if print_cache_s3.is_s3_enabled():
+        try:
+            body['downloadUrl'] = print_cache_s3.upload_print_cache_pdf(dest, f'{uid}.pdf')
+        except Exception as e:
+            logger.warning('Print-cache S3 upload failed: %s', e, exc_info=True)
+            require = str(os.environ.get('PRINT_CACHE_S3_REQUIRE_UPLOAD', '')).strip().lower() in (
+                '1', 'true', 'yes', 'on',
+            )
+            if require:
+                return _cors(jsonify({'error': 's3_upload_failed', 'detail': str(e)})), 503
+
+    resp = jsonify(body)
+    return _cors(resp), 200
+
+
+@app.route('/api/v1/print-cache/files/<path:file_id>', methods=['GET', 'OPTIONS'])
+def print_cache_download(file_id):
+    if request.method == 'OPTIONS':
+        r = Response()
+        r.headers['Access-Control-Allow-Origin'] = '*'
+        r.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        r.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return r
+
+    id_clean = file_id[:-4] if file_id.endswith('.pdf') else file_id
+    try:
+        uid = uuid_lib.UUID(id_clean)
+    except ValueError:
+        return Response('Not found', status=404)
+
+    path = os.path.join(PRINT_CACHE_DIR, f'{uid}.pdf')
+    if not os.path.isfile(path):
+        return Response('Not found', status=404)
+
+    resp = send_file(
+        path,
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name='chains-invent-cards.pdf',
+    )
+    resp.headers.add('Access-Control-Allow-Origin', '*')
+    return resp
+
+
 def main():
-    app.run(listen=cfg.listen, port=cfg.port)
+    host = cfg.listen or "127.0.0.1"
+    port = int(cfg.port) if cfg.port else 5000
+    app.run(host=host, port=port)
 
 
 if __name__ == "__main__":

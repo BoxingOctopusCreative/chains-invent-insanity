@@ -1,20 +1,28 @@
-FROM node:17-alpine3.12 as build
-
-RUN adduser -D ci2
+FROM node:20-alpine AS deps
 WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN chown ci2:ci2 /app
-USER ci2
-RUN npm install
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:17-alpine3.12 as final
-COPY --from=build /app /app
-
-RUN apk update && apk upgrade
-RUN adduser -D ci2
-RUN chown ci2:ci2 /app
-
+FROM node:20-alpine AS runner
 WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN adduser -D ci2
 USER ci2
-ENTRYPOINT ["npm", "start"]
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/content ./content
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+CMD ["node", "server.js"]

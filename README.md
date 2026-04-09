@@ -1,6 +1,6 @@
 # Chains Invent Insanity
 
-![Chains Invent Insanity](https://chains-invent-insanity-assets.sfo3.digitaloceanspaces.com/images/Logo%20Black.png)
+![Chains Invent Insanity](https://ci2-assets.chainsinventinsanity.lol/images/Logo%20Black.png)
 
 *A Markov Chain-based [Cards Against Humanity](https://cardsagainsthumanity.com) card generator.*
 
@@ -16,7 +16,8 @@
 ### Frontend
 
 * Node.js: [Node.js](https://nodejs.org/)
-* React: [React](https://reactjs.org/)
+* Next.js: [Next.js](https://nextjs.org/)
+* Tailwind: [Tailwind](https://tailwindcss.com/)
 
 ## Setup
 
@@ -44,7 +45,7 @@
 
 ### API
 
-The API is accessible at `http://localhost:8000/api/v1/`, however there are also Swagger docs available at `http://localhost:8000/apidocs/`.
+The API is accessible at `http://localhost:8000/api/v1/`. The OpenAPI spec is served at `http://localhost:8000/openapi.yaml`. With `dev-docker-compose.yml`, Swagger UI runs at `http://localhost:8080` and loads that spec.
 
 To modify any API configuration, edit the `gunicorn.conf.py` file.
 

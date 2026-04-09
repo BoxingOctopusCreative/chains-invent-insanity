@@ -5,3 +5,4 @@ flask
 python-dotenv
 gunicorn
 flask-cors
+boto3
