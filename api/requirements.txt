@@ -1,8 +1,8 @@
 markovify
 Unidecode
 requests
-flask
+flask>=3.1.0
 python-dotenv
 gunicorn
-flask-cors
+flask-cors>=6.0.0
 boto3
