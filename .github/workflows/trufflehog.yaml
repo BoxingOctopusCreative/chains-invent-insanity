@@ -1,7 +1,9 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Scan for leaked secrets using TruffleHog.
 name: Leaked Secrets Scan
 on: [push]
 jobs:
-  TruffleHog:
+  trufflehog:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
