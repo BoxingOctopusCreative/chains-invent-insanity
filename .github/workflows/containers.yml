@@ -99,17 +99,24 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
 
+      # Use `snyk container test` (current CLI) instead of snyk/actions/docker, which still invokes `snyk test --docker`
+      # and can fail or omit SARIF with newer Snyk CLI images.
       - name: Snyk Container scan
         id: snyk
         continue-on-error: true
-        uses: snyk/actions/docker@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          image: ${{ matrix.name }}:scan
-          # Only emit SARIF via args (named per matrix); avoids a duplicate default snyk.sarif from the action.
-          sarif: false
-          args: --file=${{ matrix.file }} --severity-threshold=high --sarif-file-output=snyk-${{ matrix.name }}.sarif
+        run: |
+          docker run --rm \
+            -e SNYK_TOKEN \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            snyk/snyk:docker \
+            container test "${{ matrix.name }}:scan" \
+            --file="${{ matrix.file }}" \
+            --severity-threshold=high \
+            --sarif-file-output="snyk-${{ matrix.name }}.sarif"
 
       - name: Upload Snyk SARIF to GitHub Code Scanning
         if: always() && steps.snyk.outcome != 'skipped' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
