@@ -101,12 +101,15 @@ jobs:
 
       # Use `snyk container test` (current CLI) instead of snyk/actions/docker, which still invokes `snyk test --docker`
       # and can fail or omit SARIF with newer Snyk CLI images.
+      #
+      # Exit codes (snyk container test): 0 = success, no issues; 1 = scan ok, vulnerabilities found; 2+ = scan error.
+      # We only fail the job on 2+ so CI stays green when findings exist (SARIF still uploads to the Security tab).
       - name: Snyk Container scan
         id: snyk
-        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
+          set +e
           docker run --rm \
             -e SNYK_TOKEN \
             -v "${{ github.workspace }}:/workspace" \
@@ -117,6 +120,14 @@ jobs:
             --file="${{ matrix.file }}" \
             --severity-threshold=high \
             --sarif-file-output="snyk-${{ matrix.name }}.sarif"
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          if [ "$code" -eq 1 ]; then
+            echo "::notice::Snyk found vulnerabilities (exit 1). SARIF written; job will not fail on findings only."
+          elif [ "$code" -ne 0 ]; then
+            echo "::error::Snyk scan failed with exit code $code"
+          fi
+          exit 0
 
       - name: Upload Snyk SARIF to GitHub Code Scanning
         if: always() && steps.snyk.outcome != 'skipped' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
@@ -126,8 +137,8 @@ jobs:
           sarif_file: snyk-${{ matrix.name }}.sarif
           category: snyk-container-${{ matrix.name }}
 
-      - name: Fail if Snyk reported issues
-        if: steps.snyk.outcome == 'failure'
+      - name: Fail if Snyk scan errored
+        if: steps.snyk.outputs.exit_code != '0' && steps.snyk.outputs.exit_code != '1'
         run: exit 1
 
       - name: Log in to GHCR
