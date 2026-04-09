@@ -6,14 +6,14 @@
 
 - - -
 
-## Requirements
+## Prerequisites
 
-### API
+### API Prerequisites
 
 * Pipenv: [pipenv](https://pipenv.pypa.io/)
-* Python 3.9+
+* Python 3.14+
 
-### Frontend
+### Frontend Prerequisites
 
 * Node.js: [Node.js](https://nodejs.org/)
 * Next.js: [Next.js](https://nextjs.org/)
@@ -21,33 +21,42 @@
 
 ## Setup
 
-### API
+### API Setup
 
-1. Install Pipenv Environment and all dependencies
+Install Pipenv Environment and all dependencies
 
-`pipenv install`
+```bash
+pipenv install
+```
 
-2. Start the API server
+Start the API server
 
-`pipenv run start`
+```bash
+pipenv run start
+```
 
-### Frontend
+### Frontend Setup
 
-1. Install Dependencies
+Install Dependencies
 
-`npm install`
+```bash
+npm install
+```
 
-2. Start the frontend server
+Start the frontend server
 
-`npm run start`
+```bash
+npm run start
+```
 
 ## Usage
 
-### API
+### API Usage
 
-The API is accessible at `http://localhost:8000/api/v1/`. The OpenAPI spec is served at `http://localhost:8000/openapi.yaml`. With `dev-docker-compose.yml`, Swagger UI runs at `http://localhost:8080` and loads that spec.
+The API is accessible at `http://localhost:8000/api/v1/`. The OpenAPI spec is served at `http://localhost:8000/openapi.yaml`. With `docker-compose.yml`, Swagger UI runs at `http://localhost:8080` and loads that spec.
 
 To modify any API configuration, edit the `gunicorn.conf.py` file.
 
-### Frontend
+### Frontend Usage
+
 Once the Frontend service is up and running, it can be accessed at `http://localhost:3000/`.

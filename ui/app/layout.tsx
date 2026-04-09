@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   return (
     <html lang="en">
-      <body className="min-h-screen bg-black pb-24 pt-[4.5rem] text-white sm:pb-28 sm:pt-24">
+      <body className="min-h-screen bg-black pb-24 pt-18 text-white sm:pb-28 sm:pt-24">
         <UmamiScript />
         <Suspense fallback={null}>
           <UmamiPageTracker />

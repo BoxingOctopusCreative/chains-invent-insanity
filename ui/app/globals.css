@@ -50,7 +50,7 @@ body {
   }
 
   .cah_card p {
-    @apply relative z-[1] mt-0 text-sm font-bold leading-relaxed text-black sm:text-base;
+    @apply relative z-1 mt-0 text-sm font-bold leading-relaxed text-black sm:text-base;
   }
 
   .cah_card_inverted {
@@ -70,12 +70,12 @@ body {
   }
 
   .cah_card_inverted p {
-    @apply relative z-[1] mt-0 text-sm font-bold leading-relaxed text-white sm:text-base;
+    @apply relative z-1 mt-0 text-sm font-bold leading-relaxed text-white sm:text-base;
   }
 
   .cah_card .cahlogo,
   .cah_card_inverted .cahlogo {
-    @apply absolute bottom-[0.05em] left-0 z-[1] object-contain object-left-bottom;
+    @apply absolute bottom-1 left-0 z-1 object-contain object-bottom-left;
   }
 
   .navbar-brand-logo {

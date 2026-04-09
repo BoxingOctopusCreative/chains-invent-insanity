@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 # Build and publish API and UI images to GitHub Container Registry (ghcr.io).
 name: Container images
 
