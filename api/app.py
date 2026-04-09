@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, Response, send_file
 import inventor
 import logging
 import os
+import re
 import uuid as uuid_lib
 
 import print_cache_s3
@@ -22,10 +23,32 @@ app.secret_key  = cfg.app_key
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 32 MiB PDF uploads
 
 
+def _debug_mode_env_truthy():
+    """True when DEBUG_MODE is set like env.example (local dev). Used only for CORS defaults."""
+    v = os.environ.get('DEBUG_MODE', '')
+    if not v:
+        return False
+    return str(v).strip().strip('"').strip("'").lower() in ('1', 'true', 'yes', 'on')
+
+
+# http://localhost:<port>, http://127.0.0.1:<port>, http://[::1]:<port> (any port; Next may not use 3000)
+_LOOPBACK_DEV_ORIGIN = re.compile(
+    r"^https?://(?:localhost|127\.0\.0\.1|\[::1\]):\d+$"
+)
+
+
+def _origin_is_loopback_dev(origin_key: str) -> bool:
+    """True for typical local Next.js dev URLs (any port, IPv4 or IPv6 loopback)."""
+    return bool(_LOOPBACK_DEV_ORIGIN.match(origin_key))
+
+
 def _cors_allowed_origins():
     """Comma-separated exact origins in CORS_ORIGINS (e.g. https://app.example.com,http://localhost:3000)."""
     raw = os.environ.get('CORS_ORIGINS', '').strip()
     if not raw:
+        # When unset, same-origin-only unless DEBUG: allow typical Next.js dev URLs (see api/env.example).
+        if _debug_mode_env_truthy():
+            return frozenset({'http://localhost:3000', 'http://127.0.0.1:3000'})
         return frozenset()
     out = set()
     for part in raw.split(','):
@@ -42,6 +65,9 @@ def _cors_allow_origin():
         return None
     origin_key = origin.strip().rstrip('/')
     if origin_key in _cors_allowed_origins():
+        return origin
+    # DEBUG: allow any loopback origin/port so CORS works when Next uses 3001, [::1], etc.
+    if _debug_mode_env_truthy() and _origin_is_loopback_dev(origin_key):
         return origin
     return None
 

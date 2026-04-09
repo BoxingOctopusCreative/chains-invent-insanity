@@ -20,7 +20,11 @@ function isApiUnreachable(error: unknown): boolean {
 
 function formatRequestError(error: unknown): string {
   if (isApiUnreachable(error)) {
-    return "Could not connect to the API. Make sure the backend is running and NEXT_PUBLIC_API_BASE matches it (for local dev, http://localhost:8000 is typical).";
+    return (
+      "The browser blocked the API response or the server was unreachable. " +
+      "If the API is up, this is often CORS: the page origin must be allowed (see api/env.example CORS_ORIGINS; in DEBUG_MODE loopback origins on any port are allowed). " +
+      "Also confirm NEXT_PUBLIC_API_BASE matches the API (e.g. http://localhost:8000)."
+    );
   }
   return error instanceof Error ? error.message : String(error);
 }

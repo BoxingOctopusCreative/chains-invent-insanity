@@ -148,3 +148,26 @@ def test_cors_with_disallowed_origin_omits_acao(client):
     )
     assert res.status_code == 200
     assert res.headers.get("Access-Control-Allow-Origin") is None
+
+
+def test_cors_debug_allows_loopback_any_port(client, monkeypatch):
+    """When DEBUG_MODE is on, loopback origins on any port match (Next may use 3001, [::1], etc.)."""
+    monkeypatch.setenv("DEBUG_MODE", "true")
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:3000")
+    res = client.get(
+        "/api/v1/question?num_cards=1&attempts=10",
+        headers={"Origin": "http://localhost:3001"},
+    )
+    assert res.status_code == 200
+    assert res.headers.get("Access-Control-Allow-Origin") == "http://localhost:3001"
+
+
+def test_cors_debug_allows_ipv6_loopback(client, monkeypatch):
+    monkeypatch.setenv("DEBUG_MODE", "true")
+    monkeypatch.setenv("CORS_ORIGINS", "")
+    res = client.get(
+        "/api/v1/question?num_cards=1&attempts=10",
+        headers={"Origin": "http://[::1]:3000"},
+    )
+    assert res.status_code == 200
+    assert res.headers.get("Access-Control-Allow-Origin") == "http://[::1]:3000"
