@@ -12,6 +12,7 @@
 
 * Pipenv: [pipenv](https://pipenv.pypa.io/)
 * Python 3.14+
+* **CORS:** Set `CORS_ORIGINS` in the API environment (see `api/env.example`). Browsers only receive `Access-Control-Allow-Origin` when the request’s `Origin` is listed; there is no wildcard. Without a matching origin, cross-origin front ends cannot use the API from the browser.
 
 ### Frontend Prerequisites
 
@@ -22,6 +23,8 @@
 ## Setup
 
 ### API Setup
+
+Copy `api/env.example` to `api/.env` and configure variables. **You must set `CORS_ORIGINS`** to the exact origins of any web app that calls this API (comma-separated, e.g. `https://yourapp.example,http://localhost:3000`). Local development typically includes `http://localhost:3000` and `http://127.0.0.1:3000` for the Next.js frontend.
 
 Install Pipenv Environment and all dependencies
 

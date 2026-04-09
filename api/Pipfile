@@ -4,18 +4,18 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-markovify = "*"
-requests = ">=2.33.1"
-urllib3 = ">=2.6.3"
-python-dotenv = "*"
-gunicorn = "*"
-Unidecode = "*"
-Flask = ">=3.1.0"
-flask-cors = ">=6.0.0"
-boto3 = "*"
+markovify = "==0.9.4"
+Unidecode = "==1.4.0"
+requests = "==2.33.1"
+urllib3 = "==2.6.3"
+python-dotenv = "==1.2.2"
+gunicorn = "==25.3.0"
+Flask = "==3.1.3"
+flask-cors = "==6.0.2"
+boto3 = "==1.42.86"
 
 [dev-packages]
-pytest = "*"
+pytest = "==9.0.3"
 
 [scripts]
 test = "pytest"

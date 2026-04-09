@@ -2,6 +2,12 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
+def cors_allowlist(monkeypatch):
+    """Mirror a real front-end origin; CORS headers are only sent when Origin matches."""
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost:3000")
+
+
+@pytest.fixture(autouse=True)
 def mock_invent(monkeypatch):
     """Avoid network and local wordlist coupling; exercise HTTP layer only."""
     import inventor

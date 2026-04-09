@@ -3,6 +3,8 @@ import requests
 import os
 from dotenv import load_dotenv, find_dotenv
 
+from path_sanitization import safe_local_wordlist_path
+
 # api/.env (parent of this package), loaded once before any os.environ reads
 _dotenv_loaded = False
 
@@ -30,11 +32,8 @@ def _env_truthy(*keys: str) -> bool:
 
 
 def _read_local_corpus(path: str) -> str:
-    if not path:
-        raise ValueError("Local wordlist path is not set")
-    p = path if os.path.isabs(path) else os.path.normpath(os.path.join(os.getcwd(), path))
-    with open(p, encoding="utf-8", errors="replace") as f:
-        return f.read()
+    resolved = safe_local_wordlist_path(path)
+    return resolved.read_text(encoding="utf-8", errors="replace")
 
 
 class Config:

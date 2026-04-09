@@ -14,6 +14,7 @@ import time
 
 import inventor
 import print_cache_s3
+from path_sanitization import safe_file_under_directory
 from print_cache_paths import get_print_cache_dir
 
 logger = logging.getLogger(__name__)
@@ -48,10 +49,11 @@ def cleanup_local_print_cache(max_age_seconds: int) -> int:
     for name in names:
         if not name.endswith(".pdf"):
             continue
-        path = os.path.join(directory, name)
+        path_obj = safe_file_under_directory(directory, name)
+        if path_obj is None:
+            continue
+        path = str(path_obj)
         try:
-            if not os.path.isfile(path):
-                continue
             mtime = os.path.getmtime(path)
             if now - mtime <= max_age_seconds:
                 continue

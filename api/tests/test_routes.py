@@ -1,22 +1,27 @@
 import io
-import json
 import uuid
+
+# Must match cors_allowlist in conftest.py
+CORS_TEST_ORIGIN = "http://localhost:3000"
 
 
 def test_openapi_yaml_served(client):
-    res = client.get("/openapi.yaml")
+    res = client.get("/openapi.yaml", headers={"Origin": CORS_TEST_ORIGIN})
     assert res.status_code == 200
     assert b"swagger:" in res.data
-    assert res.headers.get("Access-Control-Allow-Origin") == "*"
+    assert res.headers.get("Access-Control-Allow-Origin") == CORS_TEST_ORIGIN
 
 
 def test_question_returns_json_list(client):
-    res = client.get("/api/v1/question?num_cards=2&attempts=10")
+    res = client.get(
+        "/api/v1/question?num_cards=2&attempts=10",
+        headers={"Origin": CORS_TEST_ORIGIN},
+    )
     assert res.status_code == 200
     data = res.get_json()
     assert "answer" in data
     assert data["answer"] == ["mock-question-0", "mock-question-1"]
-    assert res.headers.get("Access-Control-Allow-Origin") == "*"
+    assert res.headers.get("Access-Control-Allow-Origin") == CORS_TEST_ORIGIN
 
 
 def test_question_rejects_invalid_num_cards(client):
@@ -37,7 +42,10 @@ def test_answer_returns_json_list(client):
 
 
 def test_print_cache_post_missing_file(client):
-    res = client.post("/api/v1/print-cache")
+    res = client.post(
+        "/api/v1/print-cache",
+        headers={"Origin": CORS_TEST_ORIGIN},
+    )
     assert res.status_code == 400
     assert res.get_json()["error"] == "missing file"
 
@@ -48,6 +56,7 @@ def test_print_cache_post_upload_and_download_roundtrip(client):
         "/api/v1/print-cache",
         data={"file": (io.BytesIO(pdf_bytes), "cards.pdf")},
         content_type="multipart/form-data",
+        headers={"Origin": CORS_TEST_ORIGIN},
     )
     assert res.status_code == 200
     body = res.get_json()
@@ -55,10 +64,13 @@ def test_print_cache_post_upload_and_download_roundtrip(client):
     assert "downloadUrl" not in body
     uuid.UUID(body["id"])  # valid UUID
 
-    dl = client.get(body["downloadPath"])
+    dl = client.get(
+        body["downloadPath"],
+        headers={"Origin": CORS_TEST_ORIGIN},
+    )
     assert dl.status_code == 200
     assert dl.data == pdf_bytes
-    assert dl.headers.get("Access-Control-Allow-Origin") == "*"
+    assert dl.headers.get("Access-Control-Allow-Origin") == CORS_TEST_ORIGIN
     assert "application/pdf" in (dl.headers.get("Content-Type") or "")
 
 
@@ -77,12 +89,12 @@ def test_print_cache_options_post_preflight(client):
         "/api/v1/print-cache",
         method="OPTIONS",
         headers={
-            "Origin": "http://localhost:3000",
+            "Origin": CORS_TEST_ORIGIN,
             "Access-Control-Request-Method": "POST",
         },
     )
     assert res.status_code == 200
-    assert res.headers.get("Access-Control-Allow-Origin") == "*"
+    assert res.headers.get("Access-Control-Allow-Origin") == CORS_TEST_ORIGIN
 
 
 def test_print_cache_post_includes_s3_download_url_when_enabled(client, monkeypatch):
@@ -109,11 +121,30 @@ def test_print_cache_post_includes_s3_download_url_when_enabled(client, monkeypa
 
 def test_print_cache_options_get_preflight(client):
     res = client.open(
-        "/api/v1/print-cache/files/x.pdf",
+        "/api/v1/print-cache/files/00000000-0000-0000-0000-000000000000.pdf",
         method="OPTIONS",
         headers={
-            "Origin": "http://localhost:3000",
+            "Origin": CORS_TEST_ORIGIN,
             "Access-Control-Request-Method": "GET",
         },
     )
     assert res.status_code == 200
+    assert res.headers.get("Access-Control-Allow-Origin") == CORS_TEST_ORIGIN
+
+
+def test_print_cache_rejects_path_segments_in_url(client):
+    """Slashes in the filename are not a valid UUID route (no path traversal)."""
+    res = client.get(
+        "/api/v1/print-cache/files/../../../etc/passwd",
+        headers={"Origin": CORS_TEST_ORIGIN},
+    )
+    assert res.status_code == 404
+
+
+def test_cors_with_disallowed_origin_omits_acao(client):
+    res = client.get(
+        "/api/v1/question?num_cards=1&attempts=10",
+        headers={"Origin": "https://evil.example"},
+    )
+    assert res.status_code == 200
+    assert res.headers.get("Access-Control-Allow-Origin") is None
