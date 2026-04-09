@@ -1,7 +1,7 @@
-FROM nginx:1.13.6
+FROM nginx:1.29.8-alpine
 
 RUN rm /etc/nginx/nginx.conf
-COPY nginx.conf /etc/nginx/
+COPY config/nginx.conf /etc/nginx/
 
 RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx-site.conf /etc/nginx/conf.d/
+COPY config/default.conf /etc/nginx/conf.d/
