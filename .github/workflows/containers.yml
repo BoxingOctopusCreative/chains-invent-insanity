@@ -1,5 +1,10 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 # Build and publish API and UI images to GitHub Container Registry (ghcr.io).
+#
+# Versioning: on push to main (e.g. after merging a PR), the release-tag job bumps a v* semver tag (default bump: patch).
+# Put #major, #minor, or #patch in a merge commit message to choose the bump; see anothrNick/github-tag-action.
+# Images are tagged with that version (plus latest, major.minor, sha). A push of v* tags also builds (manual releases).
+#
 # Trivy scans the built image and uploads SARIF to Code scanning (Security tab); requires security-events: write and
 # Code scanning enabled (Settings → Code security).
 name: Container images
@@ -65,10 +70,43 @@ jobs:
           npm run lint
           npm run typecheck
 
+  # Creates the next v* tag on main after tests pass. Skipped on PRs and on tag pushes (so manual v* builds still work).
+  release-tag:
+    runs-on: ubuntu-latest
+    needs:
+      - test-api
+      - test-ui
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    outputs:
+      new_tag: ${{ steps.tag.outputs.new_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Bump and push semver tag
+        id: tag
+        uses: anothrNick/github-tag-action@1.75.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: patch
+          RELEASE_BRANCHES: main
+          INITIAL_VERSION: v0.1.0
+
   build-and-push:
     needs:
       - test-api
       - test-ui
+      - release-tag
+    if: |
+      always() &&
+      needs.test-api.result == 'success' &&
+      needs.test-ui.result == 'success' &&
+      (needs.release-tag.result == 'skipped' || needs.release-tag.result == 'success')
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -129,9 +167,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # When release-tag ran, pretend GITHUB_REF is the new tag so semver + major.minor tags resolve for ghcr.io.
       - name: Docker metadata
         id: meta
         uses: docker/metadata-action@v6
+        env:
+          GITHUB_REF: ${{ needs.release-tag.result == 'success' && needs.release-tag.outputs.new_tag != '' && format('refs/tags/{0}', needs.release-tag.outputs.new_tag) || github.ref }}
         with:
           images: ghcr.io/${{ github.repository }}/${{ matrix.name }}
           tags: |
@@ -140,7 +181,7 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable=${{ (github.ref == 'refs/heads/main' && needs.release-tag.result == 'success') || (startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push') }}
 
       - name: Build and push
         uses: docker/build-push-action@v7
