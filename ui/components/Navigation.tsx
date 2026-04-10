@@ -108,9 +108,6 @@ export default function Navigation({ instructionsMarkdown }: NavigationProps) {
             <Link href="/invent" className={`${navLinkClass} text-lg font-bold md:text-2xl lg:text-4xl`}>
               Invent
             </Link>
-            <Link href="/grid" className={`${navLinkClass} text-lg font-bold md:text-2xl lg:text-4xl`}>
-              Card Test
-            </Link>
             <a
               href={apiDocsUrl}
               target="_blank"
