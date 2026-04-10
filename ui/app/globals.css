@@ -5,11 +5,6 @@
   --font-sans: "Helvetica Neue", Helvetica, Arial, ui-sans-serif, system-ui, sans-serif;
 }
 
-:root {
-  --cah-answer-bg: url("https://ci2-assets.chainsinventinsanity.lol/images/Answer%20Card.svg");
-  --cah-question-bg: url("https://ci2-assets.chainsinventinsanity.lol/images/Question%20Card.svg");
-}
-
 body {
   @apply m-0 bg-black font-sans text-white antialiased;
 }
@@ -43,10 +38,6 @@ body {
     inset: 0;
     z-index: 0;
     border-radius: inherit;
-    background-image: var(--cah-answer-bg);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
   }
 
   .cah_card p {
@@ -63,10 +54,6 @@ body {
     inset: 0;
     z-index: 0;
     border-radius: inherit;
-    background-image: var(--cah-question-bg);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
   }
 
   .cah_card_inverted p {

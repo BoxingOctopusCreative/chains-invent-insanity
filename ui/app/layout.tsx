@@ -8,7 +8,7 @@ import { UmamiScript } from "@/components/Umami";
 import { UmamiPageTracker } from "@/components/UmamiPageTracker";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://chainsinventinsanity.com"),
+  metadataBase: new URL("https://chainsinventinsanity.lol"),
   title: "Chains Invent Insanity",
   description: "Cards Against Humanity Generator",
   alternates: {

@@ -15,6 +15,7 @@ export function Header() {
             width={400}
             height={70}
             className="img-fluid h-auto w-auto max-w-[min(100%,min(280px,85vw))] sm:max-w-none"
+            priority
             unoptimized
           />
         </div>
