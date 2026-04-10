@@ -42,9 +42,11 @@ def _app_env():
 
 
 # Public browser origins for the deployed site (when APP_ENV=production and CORS_ORIGINS is unset).
+# Include swagger.* so hosted Swagger UI can fetch /openapi.yaml and run "Try it out" against this API.
 _PROD_CORS_ORIGINS = frozenset({
     'https://chainsinventinsanity.lol',
     'https://www.chainsinventinsanity.lol',
+    'https://swagger.chainsinventinsanity.lol',
 })
 
 _DEV_CORS_ORIGINS_STATIC = frozenset({

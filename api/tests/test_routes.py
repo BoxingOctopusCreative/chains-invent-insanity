@@ -197,6 +197,16 @@ def test_cors_prod_alias_matches_production(client, monkeypatch):
     assert res.headers.get("Access-Control-Allow-Origin") == origin
 
 
+def test_cors_production_allows_swagger_ui_origin(client, monkeypatch):
+    """Hosted Swagger UI (separate origin) fetches /openapi.yaml and calls the API from the browser."""
+    monkeypatch.delenv("CORS_ORIGINS", raising=False)
+    monkeypatch.setenv("APP_ENV", "prod")
+    origin = "https://swagger.chainsinventinsanity.lol"
+    res = client.get("/openapi.yaml", headers={"Origin": origin})
+    assert res.status_code == 200
+    assert res.headers.get("Access-Control-Allow-Origin") == origin
+
+
 def test_cors_production_default_omits_unknown_origin(client, monkeypatch):
     monkeypatch.delenv("CORS_ORIGINS", raising=False)
     monkeypatch.setenv("APP_ENV", "production")
