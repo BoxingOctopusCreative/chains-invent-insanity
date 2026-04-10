@@ -7,7 +7,7 @@ volumes:
 
 services:
   api:
-    image: ghcr.io/boxingoctopuscreative/chains-invent-insanity/api:latest
+    build: ./api
     environment:
       - DEBUG_MODE=True
       - APP_KEY=a1b2c3d4
@@ -26,7 +26,7 @@ services:
   # Removes PDFs older than PRINT_CACHE_MAX_AGE_* from the shared volume and (when configured) from S3.
   # Mirror the same PRINT_CACHE_S3_* / AWS_* vars as `api` if you use S3 mirroring.
   print-cache-cleanup:
-    image: ghcr.io/boxingoctopuscreative/chains-invent-insanity/api:latest
+    build: ./api
     command: ["python", "print_cache_cleanup.py"]
     environment:
       PYTHONUNBUFFERED: "1"
@@ -50,13 +50,11 @@ services:
       URL: http://localhost:8000/openapi.yaml
 
   ui:
-    image: ghcr.io/boxingoctopuscreative/chains-invent-insanity/ui:latest
-    environment:
-      - NEXT_PUBLIC_API_URL=http://api:8000
+    build: ./ui
+    links:
+      - api
     ports:
       - "3000:3000"
-    depends_on:
-      - api
 
   nginx:
     image: nginx:1.21.4-alpine
