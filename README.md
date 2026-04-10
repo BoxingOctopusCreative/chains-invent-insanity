@@ -12,7 +12,7 @@
 
 * Pipenv: [pipenv](https://pipenv.pypa.io/)
 * Python 3.14+
-* **CORS:** Set `CORS_ORIGINS` in the API environment (see `api/env.example`). Browsers only receive `Access-Control-Allow-Origin` when the request’s `Origin` is listed; there is no wildcard. Without a matching origin, cross-origin front ends cannot use the API from the browser.
+* **CORS / `APP_ENV`:** Set `APP_ENV=production` or `APP_ENV=prod` on the API for the default production browser origins, or `APP_ENV=development` / `APP_ENV=dev` for localhost defaults (see `api/env.example`). Optionally set `CORS_ORIGINS` to override the allowlist entirely.
 
 ### Frontend Prerequisites
 
@@ -24,7 +24,7 @@
 
 ### API Setup
 
-Copy `api/env.example` to `api/.env` and configure variables. **You must set `CORS_ORIGINS`** to the exact origins of any web app that calls this API (comma-separated, e.g. `https://yourapp.example,http://localhost:3000`). Local development typically includes `http://localhost:3000` and `http://127.0.0.1:3000` for the Next.js frontend.
+Copy `api/env.example` to `api/.env` and configure variables. Use **`APP_ENV=prod`** (or `production`) when deploying the API so CORS allows the public site by default, or set **`CORS_ORIGINS`** to a comma-separated list of exact origins if you need a custom allowlist.
 
 Install Pipenv Environment and all dependencies
 
@@ -39,6 +39,8 @@ pipenv run start
 ```
 
 ### Frontend Setup
+
+Set **`APP_ENV=prod`** (or `production`) when building the UI for deployment so the client uses the production API and OpenAPI URL by default (`ui/.env.example`). Local development can omit this or use **`APP_ENV=dev`** / `development`.
 
 Install Dependencies
 

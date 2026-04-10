@@ -24,12 +24,33 @@ app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # 32 MiB PDF uploads
 
 
 def _debug_mode_env_truthy():
-    """True when DEBUG_MODE is set like env.example (local dev). Used only for CORS defaults."""
+    """True when DEBUG_MODE is set like env.example (local dev). Used for legacy CORS loopback alongside APP_ENV."""
     v = os.environ.get('DEBUG_MODE', '')
     if not v:
         return False
     return str(v).strip().strip('"').strip("'").lower() in ('1', 'true', 'yes', 'on')
 
+
+def _app_env():
+    """Return 'production' or 'development'. Accepts prod/production and dev/development; defaults to development."""
+    v = os.environ.get('APP_ENV', 'development').strip().strip('"').strip("'").lower()
+    if v in ('production', 'prod'):
+        return 'production'
+    if v in ('development', 'dev'):
+        return 'development'
+    return 'development'
+
+
+# Public browser origins for the deployed site (when APP_ENV=production and CORS_ORIGINS is unset).
+_PROD_CORS_ORIGINS = frozenset({
+    'https://chainsinventinsanity.lol',
+    'https://www.chainsinventinsanity.lol',
+})
+
+_DEV_CORS_ORIGINS_STATIC = frozenset({
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+})
 
 # http://localhost:<port>, http://127.0.0.1:<port>, http://[::1]:<port> (any port; Next may not use 3000)
 _LOOPBACK_DEV_ORIGIN = re.compile(
@@ -43,19 +64,18 @@ def _origin_is_loopback_dev(origin_key: str) -> bool:
 
 
 def _cors_allowed_origins():
-    """Comma-separated exact origins in CORS_ORIGINS (e.g. https://app.example.com,http://localhost:3000)."""
+    """If CORS_ORIGINS is set, use that list. Otherwise APP_ENV selects production vs development defaults."""
     raw = os.environ.get('CORS_ORIGINS', '').strip()
-    if not raw:
-        # When unset, same-origin-only unless DEBUG: allow typical Next.js dev URLs (see api/env.example).
-        if _debug_mode_env_truthy():
-            return frozenset({'http://localhost:3000', 'http://127.0.0.1:3000'})
-        return frozenset()
-    out = set()
-    for part in raw.split(','):
-        p = part.strip().rstrip('/')
-        if p:
-            out.add(p)
-    return frozenset(out)
+    if raw:
+        out = set()
+        for part in raw.split(','):
+            p = part.strip().rstrip('/')
+            if p:
+                out.add(p)
+        return frozenset(out)
+    if _app_env() == 'production':
+        return _PROD_CORS_ORIGINS
+    return _DEV_CORS_ORIGINS_STATIC
 
 
 def _cors_allow_origin():
@@ -66,8 +86,10 @@ def _cors_allow_origin():
     origin_key = origin.strip().rstrip('/')
     if origin_key in _cors_allowed_origins():
         return origin
-    # DEBUG: allow any loopback origin/port so CORS works when Next uses 3001, [::1], etc.
+    # DEBUG: allow any loopback origin/port (legacy; same as development below).
     if _debug_mode_env_truthy() and _origin_is_loopback_dev(origin_key):
+        return origin
+    if _app_env() == 'development' and _origin_is_loopback_dev(origin_key):
         return origin
     return None
 

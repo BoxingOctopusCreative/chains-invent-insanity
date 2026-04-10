@@ -150,9 +150,9 @@ def test_cors_with_disallowed_origin_omits_acao(client):
     assert res.headers.get("Access-Control-Allow-Origin") is None
 
 
-def test_cors_debug_allows_loopback_any_port(client, monkeypatch):
-    """When DEBUG_MODE is on, loopback origins on any port match (Next may use 3001, [::1], etc.)."""
-    monkeypatch.setenv("DEBUG_MODE", "true")
+def test_cors_development_allows_loopback_any_port(client, monkeypatch):
+    """APP_ENV=development allows loopback on any port (Next may use 3001, [::1], etc.)."""
+    monkeypatch.setenv("APP_ENV", "development")
     monkeypatch.setenv("CORS_ORIGINS", "http://localhost:3000")
     res = client.get(
         "/api/v1/question?num_cards=1&attempts=10",
@@ -162,8 +162,8 @@ def test_cors_debug_allows_loopback_any_port(client, monkeypatch):
     assert res.headers.get("Access-Control-Allow-Origin") == "http://localhost:3001"
 
 
-def test_cors_debug_allows_ipv6_loopback(client, monkeypatch):
-    monkeypatch.setenv("DEBUG_MODE", "true")
+def test_cors_development_allows_ipv6_loopback(client, monkeypatch):
+    monkeypatch.setenv("APP_ENV", "development")
     monkeypatch.setenv("CORS_ORIGINS", "")
     res = client.get(
         "/api/v1/question?num_cards=1&attempts=10",
@@ -171,3 +171,38 @@ def test_cors_debug_allows_ipv6_loopback(client, monkeypatch):
     )
     assert res.status_code == 200
     assert res.headers.get("Access-Control-Allow-Origin") == "http://[::1]:3000"
+
+
+def test_cors_production_default_allows_site_origin(client, monkeypatch):
+    monkeypatch.delenv("CORS_ORIGINS", raising=False)
+    monkeypatch.setenv("APP_ENV", "production")
+    origin = "https://chainsinventinsanity.lol"
+    res = client.get(
+        "/api/v1/question?num_cards=1&attempts=10",
+        headers={"Origin": origin},
+    )
+    assert res.status_code == 200
+    assert res.headers.get("Access-Control-Allow-Origin") == origin
+
+
+def test_cors_prod_alias_matches_production(client, monkeypatch):
+    monkeypatch.delenv("CORS_ORIGINS", raising=False)
+    monkeypatch.setenv("APP_ENV", "prod")
+    origin = "https://www.chainsinventinsanity.lol"
+    res = client.get(
+        "/api/v1/question?num_cards=1&attempts=10",
+        headers={"Origin": origin},
+    )
+    assert res.status_code == 200
+    assert res.headers.get("Access-Control-Allow-Origin") == origin
+
+
+def test_cors_production_default_omits_unknown_origin(client, monkeypatch):
+    monkeypatch.delenv("CORS_ORIGINS", raising=False)
+    monkeypatch.setenv("APP_ENV", "production")
+    res = client.get(
+        "/api/v1/question?num_cards=1&attempts=10",
+        headers={"Origin": "https://evil.example"},
+    )
+    assert res.status_code == 200
+    assert res.headers.get("Access-Control-Allow-Origin") is None

@@ -9,6 +9,7 @@ services:
   api:
     build: ./api
     environment:
+      - APP_ENV=dev
       - DEBUG_MODE=True
       - APP_KEY=a1b2c3d4
       - PORT=8000
@@ -50,7 +51,10 @@ services:
       URL: http://localhost:8000/openapi.yaml
 
   ui:
-    build: ./ui
+    build:
+      context: ./ui
+      args:
+        APP_ENV: dev
     links:
       - api
     ports:

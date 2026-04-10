@@ -1,11 +1,35 @@
-/** Base URL for the Flask API (no trailing slash). */
-export function getApiBase(): string {
-  return process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
+const PROD_API_BASE = "https://api.chainsinventinsanity.lol";
+const DEV_API_BASE = "http://localhost:8000";
+const DEV_SWAGGER_UI_URL = "http://localhost:8080";
+/** OpenAPI spec URL when not using local Swagger UI (production default). */
+const PROD_OPENAPI_SPEC_URL = `${PROD_API_BASE}/openapi.yaml`;
+
+function appEnv(): "production" | "development" {
+  const v = (process.env.NEXT_PUBLIC_APP_ENV ?? "dev").toLowerCase();
+  if (v === "production" || v === "prod") return "production";
+  if (v === "development" || v === "dev") return "development";
+  return "development";
 }
 
-/** Base URL of the standalone Swagger UI (no trailing slash). Matches dev-docker-compose `swagger-ui` on port 8080. */
+/** Base URL for the Flask API (no trailing slash). Override with NEXT_PUBLIC_API_BASE if needed. */
+export function getApiBase(): string {
+  const override = process.env.NEXT_PUBLIC_API_BASE?.trim();
+  if (override) {
+    return override.replace(/\/$/, "");
+  }
+  return appEnv() === "production" ? PROD_API_BASE : DEV_API_BASE;
+}
+
+/**
+ * API docs link: local Swagger UI in development; hosted OpenAPI spec in production unless overridden.
+ * Override with NEXT_PUBLIC_SWAGGER_UI_URL.
+ */
 export function getSwaggerUiUrl(): string {
-  return (process.env.NEXT_PUBLIC_SWAGGER_UI_URL ?? "http://localhost:8080").replace(/\/$/, "");
+  const override = process.env.NEXT_PUBLIC_SWAGGER_UI_URL?.trim();
+  if (override) {
+    return override.replace(/\/$/, "");
+  }
+  return appEnv() === "production" ? PROD_OPENAPI_SPEC_URL : DEV_SWAGGER_UI_URL;
 }
 
 /**

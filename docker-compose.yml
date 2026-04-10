@@ -9,6 +9,7 @@ services:
   api:
     image: ghcr.io/boxingoctopuscreative/chains-invent-insanity/api:latest
     environment:
+      - APP_ENV=dev
       - DEBUG_MODE=True
       - APP_KEY=a1b2c3d4
       - PORT=8000
@@ -51,9 +52,9 @@ services:
 
   ui:
     image: ghcr.io/boxingoctopuscreative/chains-invent-insanity/ui:latest
-    # Client bundle reads NEXT_PUBLIC_* from the image build, not from this line, unless you rebuild the ui image with matching --build-arg.
+    # Client bundle is built with APP_ENV; set at image build time (see ui/Dockerfile), not here.
     environment:
-      - NEXT_PUBLIC_API_BASE=http://localhost:8000
+      - APP_ENV=dev
     ports:
       - "3000:3000"
     depends_on:

@@ -3,7 +3,8 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def cors_allowlist(monkeypatch):
-    """Mirror a real front-end origin; CORS headers are only sent when Origin matches."""
+    """Explicit CORS allowlist + development mode (matches typical local tests)."""
+    monkeypatch.setenv("APP_ENV", "dev")
     monkeypatch.setenv("CORS_ORIGINS", "http://localhost:3000")
 
 
