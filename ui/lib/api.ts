@@ -3,6 +3,7 @@ const DEV_API_BASE = "http://localhost:8000";
 const DEV_SWAGGER_UI_URL = "http://localhost:8080";
 /** OpenAPI spec URL when not using local Swagger UI (production default). */
 const PROD_OPENAPI_SPEC_URL = `${PROD_API_BASE}/openapi.yaml`;
+const PROD_SWAGGER_UI_URL = "https://swagger.chainsinventinsanity.lol";
 
 function appEnv(): "production" | "development" {
   const v = (process.env.NEXT_PUBLIC_APP_ENV ?? "dev").toLowerCase();
@@ -29,7 +30,7 @@ export function getSwaggerUiUrl(): string {
   if (override) {
     return override.replace(/\/$/, "");
   }
-  return appEnv() === "production" ? PROD_OPENAPI_SPEC_URL : DEV_SWAGGER_UI_URL;
+  return appEnv() === "production" ? PROD_SWAGGER_UI_URL : DEV_SWAGGER_UI_URL;
 }
 
 /**
