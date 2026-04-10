@@ -5,13 +5,13 @@ info:
   title: Chains Invent Insanity
   description: API for Chains Invent Insanity
   version: "2.0"
-  termsOfService: https://chainsinventinsanity.com/terms
+  termsOfService: https://chainsinventinsanity.lol/terms
   contact:
     name: Boxing Octopus Creative
     email: ryan.draga@boxingoctop.us
     url: https://boxingoctop.us
 
-host: localhost:8000
+host: api.chainsinventinsanity.lol
 basePath: /
 schemes:
   - http
