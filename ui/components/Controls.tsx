@@ -23,7 +23,7 @@ function formatRequestError(error: unknown): string {
     return (
       "The browser blocked the API response or the server was unreachable. " +
       "If the API is up, this is often CORS: the page origin must be allowed (see api/env.example CORS_ORIGINS; in DEBUG_MODE loopback origins on any port are allowed). " +
-      "Also confirm NEXT_PUBLIC_API_BASE matches the API (e.g. http://localhost:8000)."
+      "Also confirm NEXT_PUBLIC_API_BASE matches the API (e.g. http://localhost:8000); in production it must be set before the UI build so the bundle is not stuck on localhost."
     );
   }
   return error instanceof Error ? error.message : String(error);
