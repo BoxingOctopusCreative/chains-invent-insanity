@@ -7,7 +7,15 @@ import Controls from "@/components/Controls";
 import { AnswerCard } from "@/components/AnswerCard";
 import { QuestionCard } from "@/components/QuestionCard";
 import { collectPrintCardSurfaces } from "@/lib/collectPrintCardElements";
+import {
+  API_UNREACHABLE_USER_MESSAGE,
+  apiErrorDebugInfo,
+  formatUserFacingApiError,
+  isConnectionError,
+} from "@/lib/apiErrors";
+import { sendClientErrorToStderr } from "@/lib/clientErrorLog";
 import { buildCardsPdfBlob } from "@/lib/printCardsPdf";
+import { escapeHtml } from "@/lib/escapeHtml";
 import { resolveDownloadUrl, uploadPdfToPrintCache } from "@/lib/uploadPrintCache";
 
 const PLACEHOLDER = "pithy phrase here";
@@ -17,10 +25,6 @@ const swalDark = {
   color: "#f5f5f5",
   confirmButtonColor: "#525252",
 };
-
-function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
-}
 
 function normalize(texts: string[], kind: "question" | "answer"): string[] {
   return texts.length ? texts : [`(No ${kind} generated — try again.)`];
@@ -70,11 +74,28 @@ export function InventPageClient() {
         ...swalDark,
       });
     } catch (e: unknown) {
-      console.error("[Chains Invent Insanity] PDF export failed", e);
+      if (isConnectionError(e)) {
+        sendClientErrorToStderr({
+          source: "InventPageClient:print-pdf",
+          detail: formatUserFacingApiError(e),
+          meta: { ...apiErrorDebugInfo(e) },
+        });
+      } else {
+        sendClientErrorToStderr({
+          source: "InventPageClient:print-pdf",
+          detail: e instanceof Error ? e.message : String(e),
+          meta: { kind: "non-connection" },
+        });
+      }
+      const text = isConnectionError(e)
+        ? API_UNREACHABLE_USER_MESSAGE
+        : e instanceof Error
+          ? e.message
+          : String(e);
       await Swal.fire({
         icon: "error",
         title: "PDF export failed",
-        text: e instanceof Error ? e.message : String(e),
+        text,
         ...swalDark,
       });
     }

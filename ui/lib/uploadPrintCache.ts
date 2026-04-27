@@ -1,4 +1,5 @@
 import { getApiBase } from "@/lib/api";
+import { analyzeFetchFailure } from "@/lib/apiErrors";
 
 export type PrintCacheUploadResponse = {
   id: string;
@@ -14,10 +15,16 @@ export async function uploadPdfToPrintCache(blob: Blob): Promise<PrintCacheUploa
   const base = getApiBase();
   const fd = new FormData();
   fd.append("file", blob, "chains-invent-cards.pdf");
-  const res = await fetch(`${base}/api/v1/print-cache`, {
-    method: "POST",
-    body: fd,
-  });
+  const url = `${base}/api/v1/print-cache`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      body: fd,
+    });
+  } catch (e) {
+    throw analyzeFetchFailure(url, e);
+  }
   if (!res.ok) {
     const snippet = (await res.text()).slice(0, 200);
     throw new Error(`Upload failed: ${res.status} ${snippet}`);

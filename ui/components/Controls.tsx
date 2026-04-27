@@ -4,6 +4,13 @@ import React, { useState, type ChangeEvent, type FormEvent } from "react";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 import { fetchJson, getApiBase } from "@/lib/api";
+import {
+  API_UNREACHABLE_USER_MESSAGE,
+  apiErrorDebugInfo,
+  formatUserFacingApiError,
+  isConnectionError,
+} from "@/lib/apiErrors";
+import { sendClientErrorToStderr } from "@/lib/clientErrorLog";
 import { parseInventorTexts } from "@/lib/inventorResponse";
 import { PRINTABLE_CARDS_TOOLTIP } from "@/lib/printCardsPdf";
 
@@ -12,22 +19,6 @@ type FormState = {
   num_cards: string;
   attempts: string;
 };
-
-function isApiUnreachable(error: unknown): boolean {
-  const raw = error instanceof Error ? error.message : String(error);
-  return /Failed to fetch|NetworkError|network|load failed|ECONNREFUSED/i.test(raw);
-}
-
-function formatRequestError(error: unknown): string {
-  if (isApiUnreachable(error)) {
-    return (
-      "The browser blocked the API response or the server was unreachable. " +
-      "If the API is up, this is often CORS: set APP_ENV=prod on the API (or CORS_ORIGINS) so your site origin is allowed; APP_ENV=dev allows localhost and loopback. " +
-      "For the UI, APP_ENV=prod at build time targets the production API unless you override NEXT_PUBLIC_API_BASE."
-    );
-  }
-  return error instanceof Error ? error.message : String(error);
-}
 
 const swalDark = {
   background: "#171717",
@@ -109,13 +100,28 @@ export default function Controls({
         onGenerationComplete?.();
       }
     } catch (e: unknown) {
-      if (isApiUnreachable(e)) {
-        console.error("[Chains Invent Insanity] API unreachable", { base, card_type, error: e });
+      if (isConnectionError(e)) {
+        sendClientErrorToStderr({
+          source: "Controls:generate",
+          detail: formatUserFacingApiError(e),
+          meta: { base, card_type, ...apiErrorDebugInfo(e) },
+        });
+      } else {
+        sendClientErrorToStderr({
+          source: "Controls:generate",
+          detail: e instanceof Error ? e.message : String(e),
+          meta: { base, card_type, kind: "non-connection" },
+        });
       }
+      const text = isConnectionError(e)
+        ? API_UNREACHABLE_USER_MESSAGE
+        : e instanceof Error
+          ? e.message
+          : String(e);
       await Swal.fire({
         icon: "error",
         title: "API error",
-        text: formatRequestError(e),
+        text,
         ...swalDark,
       });
     } finally {

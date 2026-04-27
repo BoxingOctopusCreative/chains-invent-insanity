@@ -1,3 +1,5 @@
+import { analyzeFetchFailure } from "@/lib/apiErrors";
+
 const PROD_API_BASE = "https://api.chainsinventinsanity.lol";
 const DEV_API_BASE = "http://localhost:8000";
 const DEV_SWAGGER_UI_URL = "http://localhost:8080";
@@ -38,13 +40,18 @@ export function getSwaggerUiUrl(): string {
  * Throws if the response is not OK or body is not JSON.
  */
 export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    ...init,
-    headers: {
-      Accept: "application/json",
-      ...init?.headers,
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      ...init,
+      headers: {
+        Accept: "application/json",
+        ...init?.headers,
+      },
+    });
+  } catch (e) {
+    throw analyzeFetchFailure(url, e);
+  }
 
   if (!res.ok) {
     const snippet = (await res.text()).slice(0, 200);
