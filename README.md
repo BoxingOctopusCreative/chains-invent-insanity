@@ -65,3 +65,9 @@ To modify any API configuration, edit the `gunicorn.conf.py` file.
 ### Frontend Usage
 
 Once the Frontend service is up and running, it can be accessed at `http://localhost:3000/`.
+
+### Docker Compose vs production
+
+`docker-compose.yml` and `dev-docker-compose.yml` include an optional **nginx** service so you can hit everything on port 80 locally. **In production, traffic goes through [Traefik](https://traefik.io/)** (or your own proxy) directly to the **api** and **ui** containers; nginx from this repo is not part of that layout.
+
+Both services expose **`GET /health`** (JSON `{"status":"ok"}`) for Docker’s `healthcheck` and for upstream checks (for example Traefik’s HTTP health check pointed at `/health` on each backend).

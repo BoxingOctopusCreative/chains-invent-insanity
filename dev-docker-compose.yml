@@ -1,4 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
+#
+# Production routing uses Traefik; this file’s `nginx` service is optional for local demos on :80.
 
 ---
 
@@ -23,6 +25,18 @@ services:
       - print-cache-data:/app/print_cache
     ports:
       - "8000:8000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import sys, urllib.request; r=urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5); sys.exit(0 if r.status == 200 else 1)",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   # Removes PDFs older than PRINT_CACHE_MAX_AGE_* from the shared volume and (when configured) from S3.
   # Mirror the same PRINT_CACHE_S3_* / AWS_* vars as `api` if you use S3 mirroring.
@@ -37,7 +51,8 @@ services:
     volumes:
       - print-cache-data:/app/print_cache
     depends_on:
-      - api
+      api:
+        condition: service_healthy
 
   # Browser loads the spec from the host (localhost:8000), not from the Docker network.
   swagger-ui:
@@ -59,7 +74,23 @@ services:
       - api
     ports:
       - "3000:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://127.0.0.1:3000/health',(r)=>{r.resume();process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      api:
+        condition: service_healthy
 
+  # Local reverse proxy only — production uses Traefik in front of `api` and `ui`.
   nginx:
     image: nginx:1.21.4-alpine
     links:

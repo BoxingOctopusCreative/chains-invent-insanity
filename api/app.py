@@ -104,6 +104,12 @@ def _apply_cors(resp):
     return resp
 
 
+@app.route('/health', methods=['GET'])
+def health():
+    """Liveness probe for orchestrators and Docker healthchecks (no CORS; same-origin / in-cluster only)."""
+    return jsonify({'status': 'ok'}), 200
+
+
 @app.route('/openapi.yaml', methods=['GET', 'OPTIONS'])
 def openapi_yaml():
     if request.method == 'OPTIONS':

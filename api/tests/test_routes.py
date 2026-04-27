@@ -5,6 +5,12 @@ import uuid
 CORS_TEST_ORIGIN = "http://localhost:3000"
 
 
+def test_health_returns_ok(client):
+    res = client.get("/health")
+    assert res.status_code == 200
+    assert res.get_json() == {"status": "ok"}
+
+
 def test_openapi_yaml_served(client):
     res = client.get("/openapi.yaml", headers={"Origin": CORS_TEST_ORIGIN})
     assert res.status_code == 200
